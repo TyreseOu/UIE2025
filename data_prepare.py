@@ -42,6 +42,7 @@ def get_text_file_list(file_path):
     """
     将单个html加工成文本列表返回
     """
+    text_file_list = []
     with open(file_path, "r", encoding='utf-8', errors='ignore') as cf:
         int_error = 0
         for i, line in tqdm(enumerate(cf)):
@@ -56,8 +57,11 @@ def get_text_file_list(file_path):
                         doc_line_list = html2text(doc_line).split("\n")
                         doc_line_list = [i for i in doc_line_list if i != "" and i != ' \xa0']
                         assert doc_line_list != []
+                        text_file_list.append(doc_line_list)
                         logger.info("processed html: " + str(doc_line_list))
                     except:
                         int_error += 1
             if i > 100:
                 break
+
+    return text_file_list

@@ -64,3 +64,9 @@ def extract_index(file_path):
     except ValueError:
         idx = None
     return idx
+
+
+def get_prompt(text_content):
+    """
+    构造提示词
+    """

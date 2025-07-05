@@ -70,3 +70,6 @@ def get_prompt(text_content):
     """
     构造提示词
     """
+    return"""
+    
+    """

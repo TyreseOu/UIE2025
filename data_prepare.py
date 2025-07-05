@@ -18,18 +18,6 @@ def get_sorted_file_list(base_dir):
                 file_path = os.path.join(root, file)
                 file_path_list.append(file_path)
 
-    file = open("民事案由表.json", "r", encoding="utf-8", errors="ignore")
-    anyou_list = json.load(file)
-    htjf_anyou = []
-    for i in anyou_list:
-        try:
-            if i["2"] == "合同纠纷":
-                htjf_anyou.extend(list(i.values()))
-        except:
-            pass
-
-    htjf_anyou = list(set(htjf_anyou))
-
     file_path_list_sorted = []
     file_path_list_sorted = sorted(file_path_list, key=extract_index)
 

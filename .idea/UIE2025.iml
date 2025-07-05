@@ -5,7 +5,7 @@
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/try" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.9 (UIE2025)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Remote Python 3.10.12 (sftp://ouyangteng@10.201.173.146:22/data/oyt/.virtualenvs/UIE2025/bin/python)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

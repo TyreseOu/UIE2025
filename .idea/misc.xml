@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.9" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9 (UIE2025)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.10.12 (sftp://ouyangteng@10.201.173.146:22/data/oyt/.virtualenvs/UIE2025/bin/python)" project-jdk-type="Python SDK" />
 </project>

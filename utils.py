@@ -276,7 +276,7 @@ def get_prompt(text_content):
         "meta_被告": ["string"],               // 被告列表
         "meta_律师": ["string"],               // 出庭律师列表
         "meta_律所": ["string"],               // 律师所在律所
-        "lawyerInfo": ["string"],              // 律师-律所组合信息（如“张三-北京律所”）
+        "lawyerInfo": ["string"],              // 律师-律所组合信息
         "meta_审判长": "string",               // 审判长姓名
         "meta_审判员": ["string"],             // 审判员列表
         "meta_书记员": "string",               // 书记员姓名
@@ -284,15 +284,16 @@ def get_prompt(text_content):
         // 当事人信息与关系图谱
         "meta_人物信息": [                     // 结构化当事人列表
           {{
-        "pname": "string",                // 姓名或单位名
+            "pname": "string",                // 姓名或单位名
             "ptype": "string",                // 身份，如 “原告”、“被告”
-            "pnameType": 1,                   // 类型编号（1=自然人，2=单位）
+            "pnameType": 1,                   // 类型编号，被告1、原告2、其它3
             "ptypes": ["string"],             // 所有身份合集
             //人物身份信息，可以根据实际提供的信息自行补充
             "peopleAttrMap": 
             {{                
               "info_性别": "string",            
-              "info_当事人所有地位": ["string"]
+              "info_当事人所有地位": ["string"],
+              "info_居住地址_分类": ["string"]
             }}
           }}
         ],
@@ -329,8 +330,8 @@ def get_prompt(text_content):
             "meta_法院名称": "string"
           }}
         ],
-        // 位置信息
-        "pos": "string"                      // 文本位置标识（如“原文”或段落原文结构）
+        // 原文
+        "pos": "string"                      // 原文
       }}
     }}
 

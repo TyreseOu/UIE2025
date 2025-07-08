@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import json
-from bs4 import BeautifulSoup
 import csv
-from collections import Counter
 import json
+from collections import Counter
+
+from bs4 import BeautifulSoup
 
 
 def field_majority_vote(sample_outputs):
@@ -230,62 +230,110 @@ def get_set_content():
 
 
 def get_prompt(text_content):
-    return f"""
+    return """
     你是一位**法律信息抽取的专家**，现在请你从下面提供的**法律文书**中提取信息，并严格按照我给定的JSON格式输出，**不要输出任何额外内容或解释**。
 
     ## 任务要求  
-    1. 只返回**合法JSON**，不要有任何额外内容（如“好的”或“如下”）。  
-    2. JSON的结构必须完全与示例一致：包含`_type`, `_source`, `_id`, `_index`, `_score`等字段。  
-    3. `_source`中各字段key固定，如`meta_案件名称`、`section_落款`等，不要改动。  
-    4. 如无法提取某字段，请返回空字符串`""`或空列表`[]`。
-    5. 布尔字段如`info_同意离婚`必须为`true`或`false`。
-    6. 日期请尽量提取为`YYYY-MM-DD`格式。
-    7. _index的value全为es_fdlawcase_all。
-    8. _id的value对应docId。
+    1. 只返回**合法JSON**，不要有任何额外内容。  
+    2. 下面的输出格式仅为示例，JSON的key可以参考给出的格式，但若有额外未给出的key，则同样提取出来。
+    3. 若没有对应key的value，则删除该key。  
+    4. 布尔字段如`info_同意离婚`必须为`true`或`false`。
+    5. 日期请尽量提取为`YYYY-MM-DD`格式。
+    6. _index的value全为es_fdlawcase_all。
+    7. _id的value对应docId。
+    8. key的风格尽量与示例保持一致。
 
     ## 输出格式示例  
     返回内容请严格按照以下JSON格式（不要添加任何其它标记或注释）：
     {{
-        "_type": "_doc",
-        "_source": {{
-            "meta_案件名称": "",
-            "section_落款": "",
-            "meta_法院层级": "",
-            "meta_判决层级": "",
-            "meta_关键词2": "",
-            "meta_审判员": [],
-            "info_同意离婚": false,
-            "meta_法院_市": "",
-            "meta_审理程序类型": "",
-            "meta_法院_省": "",
-            "meta_案号": "",
-            "caseId": "",
-            "meta_案件来源": "",
-            "meta_文书名称": "",
-            "meta_判决书名字": "",
-            "section_文书首部": "",
-            "meta_开庭情况": "",
-            "meta_案由": "",
-            "meta_判决类型": "",
-            "section_标题": "",
-            "section_理由": "",
-            "section_文书尾部": "",
-            "version": "",
-            "meta_法院名称": "",
-            "meta_法院_区县": "",
-            "meta_裁判日期": "",
-            "meta_案件类型": "",
-            "meta_书记员": "",
-            "section_判决主文": "",
-            "section_裁判依据": "",
-            "meta_关键词": [],
-            "meta_法律条款": []
-        }},
-        "_id": "",
-        "_index": "",
-        "_score": 1
+      "_type": "_doc",                     // 固定为"_doc"
+      "_id": "string",                     // 文档唯一ID
+      "_index": "string",                  // 索引名，通常为 "es_fdlawcase_all"
+      "_score": 1,                         // 固定为1
+      "_source": {{
+        "caseId": "string",                // 案件唯一标识
+        "version": "string",              // 数据版本号，例如 "20191101"
+        // 案件基本信息
+        "meta_案件名称": "string",             // 案件全称
+        "meta_案号": "string",                // 案件编号（如 “（2020）沪01民终123号”）
+        "meta_案由": "string",                // 案由，如 “民间借贷纠纷”
+        "meta_案件类型": "string",             // 案件类型，如 “民事”
+        "meta_案件来源": "string",             // 案件来源，如 “上诉”、“其他”
+        "meta_判决书名字": "string",           // 判决书名称，如 “民事判决书”
+        "meta_判决类型": "string",             // 判决文书类别（如判决书、裁定书）
+        "meta_判决层级": "string",             // 判决层级，如“一审”、“二审”
+        "meta_裁判日期": "yyyy-mm-dd",        // 判决日期
+        "meta_审理程序类型": "string",         // 审理程序类型，如 “普通程序”
+        "meta_开庭情况": "string",             // 开庭情况，如 “公开开庭审理”
+        // 法院信息
+        "meta_法院名称": "string",             // 审理法院名称
+        "meta_法院层级": "string",             // 法院层级，如 “基层”、“中级”
+        "meta_法院_省": "string",              // 法院所在省
+        "meta_法院_市": "string",              // 法院所在市
+        "meta_法院_区县": "string",            // 法院所在区县
+        // 人员信息
+        "meta_原告": ["string"],               // 原告列表
+        "meta_被告": ["string"],               // 被告列表
+        "meta_律师": ["string"],               // 出庭律师列表
+        "meta_律所": ["string"],               // 律师所在律所
+        "lawyerInfo": ["string"],              // 律师-律所组合信息（如“张三-北京律所”）
+        "meta_审判长": "string",               // 审判长姓名
+        "meta_审判员": ["string"],             // 审判员列表
+        "meta_书记员": "string",               // 书记员姓名
+        "meta_人民陪审员": ["string"],         // 人民陪审员姓名（如有）
+        // 当事人信息与关系图谱
+        "meta_人物信息": [                     // 结构化当事人列表
+          {{
+        "pname": "string",                // 姓名或单位名
+            "ptype": "string",                // 身份，如 “原告”、“被告”
+            "pnameType": 1,                   // 类型编号（1=自然人，2=单位）
+            "ptypes": ["string"],             // 所有身份合集
+            //人物身份信息，可以根据实际提供的信息自行补充
+            "peopleAttrMap": 
+            {{                
+              "info_性别": "string",            
+              "info_当事人所有地位": ["string"]
+            }}
+          }}
+        ],
+        "meta_当事人关系": [                  // 人物之间的结构化关系图
+          {{
+        "sourcePersonName": "string",     // 源人物
+            "targetPersonName": "string",     // 目标人物
+            "relations": ["string"]           // 关系名称，如“担保”、“借贷”
+          }}
+        ],
+        // 判决结构化内容
+        "section_标题": "string",             // 判决文书标题部分
+        "section_文书首部": "string",         // 文书首部内容（案由、当事人）
+        "section_原告陈述": "string",         // 原告诉称
+        "section_被告陈述": "string",         // 被告答辩
+        "section_事实构成": "string",         // 审理查明的事实
+        "section_理由": "string",             // 法院认定理由
+        "section_裁判依据": "string",         // 引用法律依据
+        "section_判决主文": "string",         // 判决结果
+        "section_文书尾部": "string",         // 文书末尾签署部分
+        "section_落款": "string",             // 法官署名与日期
+        "meta_案件结果": "string",            // 案件裁判结果（如“全部支持”）
+        "info_二审裁判结果": "string",        // 若为二审，记录其裁判结论
+        // 法律条文
+        "meta_关键词": ["string"],           // 案件关键词列表
+        "meta_法律条款": ["string"],         // 法律条文原文
+        "meta_法律条款索引": ["string"],     // 法律条文的ID/索引
+        // 关联信息（主要出现在二审中）
+        "meta_一审案号": "string",            // 原审案号
+        "meta_关联案号": ["string"],          // 所有关联案号
+        "meta_关联文书": [                    // 所有关联文书（一般为一审）
+          {{
+        "meta_案号": "string",
+            "meta_法院名称": "string"
+          }}
+        ],
+        // 位置信息
+        "pos": "string"                      // 文本位置标识（如“原文”或段落原文结构）
+      }}
     }}
 
     ## 法律文书
     {text_content}
-    """
+    """.format(text_content=text_content)

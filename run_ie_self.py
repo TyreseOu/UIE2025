@@ -31,6 +31,7 @@ if __name__ == '__main__':
                 try:
                     completion = client.chat.completions.create(
                         model=MODEL_NAME,
+                        temperature=0.8,
                         messages=[
                             {"role": "system", "content": "You are a helpful assistant."},
                             {

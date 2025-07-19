@@ -1,7 +1,7 @@
 import os
 import json
 from openai import OpenAI
-from data_prepare import get_sorted_file_list, get_text_file_list
+from data_prepare import get_sorted_file_list, get_text_file
 from logger import logger
 from utils import get_prompt, field_majority_vote
 
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     file_path_list_sorted = get_sorted_file_list(base_dir='/data/clz/unziped_files')
 
     for file_path in file_path_list_sorted:
-        text_file_list = get_text_file_list(file_path=file_path)
+        text_file_list = get_text_file(file_path=file_path)
 
         extraction_results = []
 

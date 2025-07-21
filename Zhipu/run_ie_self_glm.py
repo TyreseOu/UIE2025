@@ -21,6 +21,9 @@ def call_openai_sync(text_file, i):
                     "content": get_prompt(text_content=text_file)
                 },
             ],
+            temperature=0.8,
+            top_p=0.7,
+            max_tokens=4096
         )
         extracted_json_str = response.choices[0].message.content.strip()
         extracted_json = json.loads(extracted_json_str)

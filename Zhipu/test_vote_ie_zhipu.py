@@ -1,57 +1,46 @@
 import asyncio
 import json
-import os
-from openai import OpenAI
+
+from zhipuai import ZhipuAI
+
 from logger import logger
 from utils import get_prompt, field_majority_vote, get_set_content
 
-client = OpenAI(
-    api_key=os.getenv("DASHSCOPE_API_KEY"),
-    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-)
-
+client = ZhipuAI(api_key="你的API_KEY")
 NUM_SAMPLES = 3
-MODEL_NAME = "qwen-max-latest"
 
 
-def call_api_sync(text_content, i):
-    """
-    同步调用
-    """
+def call_zhipu_sync(text_file, i):
     try:
-        completion = client.chat.completions.create(
-            model=MODEL_NAME,
-            temperature=0.8,
+        response = client.chat.completions.create(
+            model="GLM-4-Flash",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {
                     "role": "user",
-                    "content": get_prompt(text_content=text_content)
+                    "content": get_prompt(text_content=text_file)
                 },
             ],
-            extra_body={
-                "enable_thinking": False
-            },
+            temperature=0.8,
+            top_p=0.7,
+            max_tokens=4096
         )
-        extracted_json_str = completion.choices[0].message.content.strip()
+        extracted_json_str = response.choices[0].message.content.strip()
         extracted_json = json.loads(extracted_json_str)
         return extracted_json
-    except Exception:
-        logger.warning(f"[警告] 第{i + 1}次调用失败")
+    except Exception as e:
+        logger.warning(f"[警告] 第{i + 1}次调用失败", exc_info=e)
         return None
 
 
-async def call_api_async(text_content, i):
-    """
-    异步调用
-    """
-    return await asyncio.to_thread(call_api_sync, text_content, i)
+async def call_zhipu_async(text_file, i):
+    return await asyncio.to_thread(call_zhipu_sync, text_file, i)
 
 
 async def main():
     text_content = get_set_content()
 
-    tasks = [call_api_async(text_content, i) for i in range(NUM_SAMPLES)]
+    tasks = [call_zhipu_async(text_content, i) for i in range(NUM_SAMPLES)]
     results = await asyncio.gather(*tasks)
 
     sample_outputs = [r for r in results if r is not None]

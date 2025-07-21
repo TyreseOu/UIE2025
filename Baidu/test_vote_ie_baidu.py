@@ -1,10 +1,8 @@
 import asyncio
 import json
-import os
 import erniebot
-from utils import get_prompt, field_majority_vote
-from data_prepare import get_sorted_file_list, get_text_file
 from logger import logger
+from utils import get_prompt, field_majority_vote, get_set_content
 
 erniebot.api_type = 'aistudio'
 erniebot.access_token = '{YOUR-ACCESS-TOKEN}'
@@ -37,8 +35,9 @@ async def call_baidu_async(text_file, i):
     return await asyncio.to_thread(call_baidu_sync, text_file, i)
 
 
-async def process_text_file(text_file):
-    tasks = [call_baidu_async(text_file, i) for i in range(NUM_SAMPLES)]
+async def main():
+    text_content = get_set_content()
+    tasks = [call_baidu_async(text_content, i) for i in range(NUM_SAMPLES)]
     results = await asyncio.gather(*tasks)
 
     sample_outputs = [r for r in results if r is not None]
@@ -52,32 +51,11 @@ async def process_text_file(text_file):
         logger.error(f"[自一致]部分样本非JSON")
 
     logger.info("最终结果: {}".format(final_data))
-    return final_data
-
-
-async def process_file_group(file_path):
-    text_files = get_text_file(file_path=file_path)
-
-    results = []
-    for text_file in text_files:
-        result = await process_text_file(text_file)
-        results.append(result)
-
-    # 保存输出
-    parts = file_path.split("/")
-    part = parts[-1].split(".")[0]
-    output_file = f"/data/oyt/result_ie/{part}"
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    output_file = "final_result.json"
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(results, f, ensure_ascii=False, indent=4)
+        json.dump(final_data, f, ensure_ascii=False, indent=4)
+
     logger.info(f"[文件输出] 已将结果保存到 {output_file}")
-
-
-async def main():
-    file_path_list_sorted = get_sorted_file_list(base_dir='/data/wxr/qwContent_data')
-
-    for file_path in file_path_list_sorted:
-        await process_file_group(file_path)
 
 
 if __name__ == '__main__':

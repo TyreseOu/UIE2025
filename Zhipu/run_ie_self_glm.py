@@ -10,7 +10,7 @@ client = ZhipuAI(api_key="你的API_KEY")
 NUM_SAMPLES = 3
 
 
-def call_openai_sync(text_file, i):
+def call_zhipu_sync(text_file, i):
     try:
         response = client.chat.completions.create(
             model="GLM-4-Flash",
@@ -33,12 +33,12 @@ def call_openai_sync(text_file, i):
         return None
 
 
-async def call_openai_async(text_file, i):
-    return await asyncio.to_thread(call_openai_sync, text_file, i)
+async def call_zhipu_async(text_file, i):
+    return await asyncio.to_thread(call_zhipu_sync, text_file, i)
 
 
 async def process_text_file(text_file):
-    tasks = [call_openai_async(text_file, i) for i in range(NUM_SAMPLES)]
+    tasks = [call_zhipu_async(text_file, i) for i in range(NUM_SAMPLES)]
     results = await asyncio.gather(*tasks)
 
     sample_outputs = [r for r in results if r is not None]
